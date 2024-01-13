@@ -4,16 +4,16 @@
       <div class="logo">
         <el-image style="width: 100px; height: 100px" src="public/favicon.ico" fit="fill" :lazy="true" />
       </div>
-      <el-form>
-        <el-form-item>
-          <el-input class="input" placeholder="Username" clearable :prefix-icon="User" />
+      <el-form ref="formRef" :model="form" :rules="rules">
+        <el-form-item prop="username">
+          <el-input class="input" v-model="form.username" placeholder="Username" clearable :prefix-icon="User" />
         </el-form-item>
-        <el-form-item>
-          <el-input class="input" placeholder="Password" clearable show-password :prefix-icon="Lock" />
+        <el-form-item prop="password">
+          <el-input class="input" v-model="form.password" placeholder="Password" clearable show-password :prefix-icon="Lock" />
         </el-form-item>
         <div class="btns">
           <el-button type="primary" class="btn">Login</el-button>
-          <button class="btn reset">Reset</button>
+          <div class="btn reset" @click="reset">Reset</div>
         </div>
       </el-form>
     </div>
@@ -21,8 +21,26 @@
 </template>
 
 <script setup lang="ts">
-
 import {User, Lock} from "@element-plus/icons-vue";
+import { ref } from "vue";
+import type {FormInstance} from "element-plus";
+import { rules } from "@/rules/userinfo";
+
+interface Form {
+  username: string;
+  password: string;
+}
+
+const form = ref<Form>({
+  username: "",
+  password: ""
+})
+
+const formRef = ref<FormInstance>();
+
+const reset = () => {
+  formRef.value?.resetFields();
+}
 </script>
 
 <style lang="scss" scoped>
@@ -74,10 +92,16 @@ import {User, Lock} from "@element-plus/icons-vue";
           cursor: pointer;
         }
         .reset {
-          margin-top: -20px;
+          margin-top: -10px;
           text-align: center;
           border: none;
           background: transparent;
+        }
+        .reset:hover {
+          color: red;
+        }
+        .reset:active {
+          color: yellow;
         }
       }
     }
