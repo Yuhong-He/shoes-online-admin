@@ -1,5 +1,6 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import HomeView from '../views/HomeView.vue';
+import { useUserInfoStore } from "@/stores/userInfo.store";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -16,17 +17,22 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
+      meta: {
+        noAuth: true
+      },
       component: () => import('../views/LoginView.vue')
     }
   ]
 })
 
-// router.beforeEach((to, from, next) => {
-//   // if (userLogin) {
-//   //   next();
-//   // } else {
-//   //   next("/login");
-//   // }
-// })
+const userInfoStore = useUserInfoStore();
+
+router.beforeEach((to, from, next) => {
+  if (to.meta.noAuth || userInfoStore.authFromLocal()) {
+    next();
+  } else {
+    router.push("/login").then(() => {});
+  }
+})
 
 export default router

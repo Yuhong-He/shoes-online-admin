@@ -12,7 +12,7 @@
           <el-input class="input" v-model="form.password" placeholder="Password" clearable show-password :prefix-icon="Lock" />
         </el-form-item>
         <div class="btns">
-          <el-button type="primary" class="btn">Login</el-button>
+          <el-button type="primary" class="btn" @click="login">Login</el-button>
           <div class="btn reset" @click="reset">Reset</div>
         </div>
       </el-form>
@@ -25,6 +25,12 @@ import {User, Lock} from "@element-plus/icons-vue";
 import { ref } from "vue";
 import type {FormInstance} from "element-plus";
 import { rules } from "@/rules/userinfo";
+import {loginApi} from "@/apis/login";
+import { useUserInfoStore } from "@/stores/userInfo.store";
+import {ElMessage} from "element-plus";
+import router from "@/router";
+
+const userInfoStore = useUserInfoStore();
 
 interface Form {
   username: string;
@@ -40,6 +46,15 @@ const formRef = ref<FormInstance>();
 
 const reset = () => {
   formRef.value?.resetFields();
+}
+
+const login = async () => {
+  const res = await loginApi(form.value);
+  if (res && res.code == 200) {
+    userInfoStore.setAuth(res.data.token);
+    ElMessage.success("Login Success");
+    router.push("/").then(() => {});
+  }
 }
 </script>
 

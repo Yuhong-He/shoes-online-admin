@@ -19,7 +19,7 @@ export const $http = async (config: AxiosRequestConfig) => {
         const axiosResponse = await httpInstance<BkResponse>(config);
         const bkResponse = axiosResponse.data;
         if (!bkResponse?.succeed) {
-            let errTitle: string = "Error";
+            let errTitle: string;
             if (bkResponse.code === 401) {
                 errTitle = "Unauthorised";
             } else if (bkResponse.code === 403) {
