@@ -7,35 +7,23 @@
         default-active="2"
         text-color="#c1c1c1"
     >
-      <el-sub-menu index="1">
-        <template #title>
-          <el-icon><location /></el-icon>
-          <span>Navigator One</span>
+      <component :is="item.children? ElSubMenu : ElMenuItem" v-for="item in menuList" :key="item.id" :index="item.index">
+        <template v-if="item.children" #title>
+          <el-icon v-if="item.icon">
+            <component :is="item.icon"></component>
+          </el-icon>
+          <span>{{ item.name }}</span>
         </template>
-        <el-menu-item-group title="Group One">
-          <el-menu-item index="1-1">item one</el-menu-item>
-          <el-menu-item index="1-2">item two</el-menu-item>
-        </el-menu-item-group>
-        <el-menu-item-group title="Group Two">
-          <el-menu-item index="1-3">item three</el-menu-item>
-        </el-menu-item-group>
-        <el-sub-menu index="1-4">
-          <template #title>item four</template>
-          <el-menu-item index="1-4-1">item one</el-menu-item>
-        </el-sub-menu>
-      </el-sub-menu>
-      <el-menu-item index="2">
-        <el-icon><icon-menu /></el-icon>
-        <span>Navigator Two</span>
-      </el-menu-item>
-      <el-menu-item index="3" disabled>
-        <el-icon><document /></el-icon>
-        <span>Navigator Three</span>
-      </el-menu-item>
-      <el-menu-item index="4">
-        <el-icon><setting /></el-icon>
-        <span>Navigator Four</span>
-      </el-menu-item>
+        <span v-if="!item.children">
+          <el-icon v-if="item.icon">
+            <component :is="item.icon"></component>
+          </el-icon>
+          <span>{{ item.name }}</span>
+        </span>
+        <el-menu-item v-for="subItem in item.children" :key="subItem.id" :index="subItem.index">
+          {{ subItem.name }}
+        </el-menu-item>
+      </component>
     </el-menu>
   </div>
 </template>
@@ -43,6 +31,7 @@
 <script setup lang="ts">
 import {Document, Goods, House, Setting, User} from "@element-plus/icons-vue";
 import type {Component} from "vue";
+import { ElSubMenu, ElMenuItem } from "element-plus";
 
 interface MenuItem {
   id: number;
@@ -61,13 +50,13 @@ const menuList: MenuItem[] = [
   },
   {
     id: 2,
-    name: "User Management",
+    name: "User Manage",
     index: "/home/users",
     icon: User,
   },
   {
     id: 101,
-    name: "Product Management",
+    name: "Product Manage",
     index: "/product-management",
     icon: Goods,
     children: [
