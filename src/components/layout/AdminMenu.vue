@@ -4,8 +4,9 @@
         active-text-color="#fff"
         background-color="#2b2c43"
         class="el-menu-vertical-demo"
-        default-active="2"
+        :default-active="defaultActive"
         text-color="#c1c1c1"
+        router=""
     >
       <component :is="item.children? ElSubMenu : ElMenuItem" v-for="item in menuList" :key="item.id" :index="item.index">
         <template v-if="item.children" #title>
@@ -29,9 +30,13 @@
 </template>
 
 <script setup lang="ts">
-import {Document, Goods, House, Setting, User} from "@element-plus/icons-vue";
+import {Goods, House, User} from "@element-plus/icons-vue";
 import type {Component} from "vue";
+import { ref } from "vue";
 import { ElSubMenu, ElMenuItem } from "element-plus";
+import router from "@/router";
+
+const defaultActive = ref<string>(router.currentRoute.value.path);
 
 interface MenuItem {
   id: number;

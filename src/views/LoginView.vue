@@ -53,7 +53,7 @@ const login = async () => {
   if (res && res.code == 200) {
     userInfoStore.setAuth(res.data.token);
     ElMessage.success("Login Success");
-    router.push("/").then(() => {});
+    router.push("/home/admin-home").then(() => {});
   }
 }
 </script>
