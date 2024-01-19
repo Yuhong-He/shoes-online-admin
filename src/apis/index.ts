@@ -1,6 +1,7 @@
 import axios, {AxiosError} from "axios";
 import type {AxiosRequestConfig} from "axios";
 import {ElLoading, ElMessage} from "element-plus";
+import router from "@/router";
 
 export const httpInstance = axios.create();
 
@@ -22,6 +23,7 @@ export const $http = async (config: AxiosRequestConfig) => {
             let errTitle: string;
             if (bkResponse.code === 401) {
                 errTitle = "Unauthorised";
+                router.push("/login").then(()=>{});
             } else if (bkResponse.code === 403) {
                 errTitle = "Forbidden";
             } else if (bkResponse.code === 9999) {

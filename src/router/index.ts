@@ -45,12 +45,12 @@ const router = createRouter({
 
 const userInfoStore = useUserInfoStore();
 
-// router.beforeEach((to, from, next) => {
-//   if (to.meta.noAuth || userInfoStore.authFromLocal()) {
-//     next();
-//   } else {
-//     router.push("/login").then(() => {});
-//   }
-// })
+router.beforeEach((to, from, next) => {
+  if (to.meta.noAuth || userInfoStore.authFromLocal()) {
+    next();
+  } else {
+    router.push("/login").then(() => {});
+  }
+})
 
 export default router

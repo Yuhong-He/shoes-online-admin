@@ -21,7 +21,17 @@
 <script setup lang="ts">
 import AdminHeader from "@/components/layout/AdminHeader.vue";
 import AdminMenu from "@/components/layout/AdminMenu.vue";
+import { useUserInfoStore } from "@/stores/userInfo.store";
+import {getUserinfoApi} from "@/apis/userinfo";
+const userInfoStore = useUserInfoStore();
 
+const getUserinfo = async () => {
+  const res = await getUserinfoApi();
+  if (res && res.code == 200) {
+    userInfoStore.userinfo = res.data;
+  }
+}
+getUserinfo();
 </script>
 
 <style lang="scss" scoped>

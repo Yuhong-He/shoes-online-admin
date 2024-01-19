@@ -1,8 +1,20 @@
 import {defineStore} from "pinia";
 import {httpInstance} from "@/apis";
 import router from "@/router";
+import {ref} from "vue";
+
+export interface Userinfo {
+    "avater": string,
+    "email": string,
+    "gender": number,
+    "integration": number,
+    "nickname": string,
+    "phoneNumber": string,
+    "username": string
+}
 
 export const useUserInfoStore = defineStore("userinfo-store", () => {
+    const userinfo = ref<Userinfo>();
     const setAuth = (token: string) => {
         httpInstance.defaults.headers.common.Authorization = token;
         localStorage.setItem("token", token);
@@ -21,6 +33,7 @@ export const useUserInfoStore = defineStore("userinfo-store", () => {
         router.push("/login").then(() => {});
     };
     return {
+        userinfo,
         setAuth,
         authFromLocal,
         removeAuth
