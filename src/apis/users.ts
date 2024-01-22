@@ -7,3 +7,11 @@ export const getUserListApi = (params : {pageSize: number, requestPage: number})
         params,
     })
 }
+
+export const disableOrEnableUserApi = (ids: number[]) => {
+    const query = ids.join(",");
+    return $http({
+        method: "PUT",
+        url: `/admin/user/disable/${query}`
+    })
+}

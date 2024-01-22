@@ -10,13 +10,17 @@
             v-model="keyword"
             placeholder="Please input"
             class="input"
+            clearable
         >
           <template #append>
-            <el-button :icon="Search" />
+            <el-button :icon="Search" @click="handleSearch"/>
           </template>
         </el-input>
+        <el-button type="danger" size="default" @click="disableUsers">Batch Disable</el-button>
+        <el-button type="primary" size="default" @click="enableUsers">Batch Enable</el-button>
       </div>
-      <el-table :data="tableData" style="width: 100%">
+      <el-table :data="searchRes.length? searchRes : tableData" style="width: 100%" @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="55" />
         <el-table-column prop="id" label="id" width="55px"></el-table-column>
         <el-table-column prop="username" label="Username"></el-table-column>
         <el-table-column prop="nickname" label="Nickname"></el-table-column>
@@ -45,7 +49,7 @@
         </el-table-column>
         <el-table-column label="Operations">
           <template #default="scope">
-            <el-button size="small" @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
+            <el-button size="small" @click="">Edit</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -65,7 +69,8 @@
 <script setup lang="ts">
 import {ArrowRight, Search} from '@element-plus/icons-vue'
 import {ref} from "vue";
-import {getUserListApi} from "@/apis/users";
+import {disableOrEnableUserApi, getUserListApi} from "@/apis/users";
+import {ElMessage} from "element-plus";
 
 const keyword = ref<string>();
 const query = ref({
@@ -90,10 +95,6 @@ interface User {
   "username": string
 }
 
-const handleEdit = (index: number, row: User) => {
-  console.log(index, row)
-}
-
 const tableData = ref<User[]>([]);
 const getUserList = async () => {
   const res = await getUserListApi(query.value);
@@ -104,6 +105,36 @@ const getUserList = async () => {
     tableData.value = res.data.records;
     total = res.data.totalElements;
   }
+}
+
+const selectedUsers = ref<User[]>([]);
+const handleSelectionChange = (val: User[]) => {
+  selectedUsers.value = val;
+}
+const disableUsers = async () => {
+  selectedUsers.value = selectedUsers.value.filter((user) => !user.status);
+  const ids = selectedUsers.value.map((user) => user.id);
+  const res = await disableOrEnableUserApi(ids);
+  if (res && res.code === 200) {
+    ElMessage.success(res.message);
+  }
+}
+const enableUsers = async () => {
+  selectedUsers.value = selectedUsers.value.filter((user) => user.status);
+  const ids = selectedUsers.value.map((user) => user.id);
+  const res = await disableOrEnableUserApi(ids);
+  if (res && res.code === 200) {
+    ElMessage.success(res.message);
+  }
+}
+
+const searchRes = ref<User[]>([]);
+const handleSearch = () => {
+  searchRes.value = tableData.value.filter((user) =>
+    user.username
+        .toLocaleLowerCase()
+        .indexOf(keyword.value?.toLocaleLowerCase()) != -1
+  )
 }
 
 getUserList();
@@ -118,6 +149,7 @@ getUserList();
   .header {
     .input {
       width: 30%;
+      margin-right: 10px;
     }
   }
 
