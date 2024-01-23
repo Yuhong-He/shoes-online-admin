@@ -15,3 +15,11 @@ export const disableOrEnableUserApi = (ids: number[]) => {
         url: `/admin/user/disable/${query}`
     })
 }
+
+export const updateUserApi = (id: number, data: {phoneNumber: string; nickName: string}) => {
+    return $http({
+        method: "PUT",
+        url: `/admin/user/${id}`,
+        data: data
+    })
+}

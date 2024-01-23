@@ -16,8 +16,32 @@
             <el-button :icon="Search" @click="handleSearch"/>
           </template>
         </el-input>
-        <el-button type="danger" size="default" @click="disableUsers">Batch Disable</el-button>
-        <el-button type="primary" size="default" @click="enableUsers">Batch Enable</el-button>
+        <el-popconfirm
+            width="220"
+            confirm-button-text="OK"
+            cancel-button-text="No, Thanks"
+            :icon="InfoFilled"
+            icon-color="#626AEF"
+            title="Are you sure to disable these users?"
+            @confirm="disableUsers"
+        >
+          <template #reference>
+            <el-button type="danger" size="default">Batch Disable</el-button>
+          </template>
+        </el-popconfirm>
+        <el-popconfirm
+            width="220"
+            confirm-button-text="OK"
+            cancel-button-text="No, Thanks"
+            :icon="InfoFilled"
+            icon-color="#626AEF"
+            title="Are you sure to enable these users?"
+            @confirm="enableUsers"
+        >
+          <template #reference>
+            <el-button type="primary" size="default">Batch Enable</el-button>
+          </template>
+        </el-popconfirm>
       </div>
       <el-table :data="searchRes.length? searchRes : tableData" style="width: 100%" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
@@ -43,13 +67,13 @@
         <el-table-column label="Status">
           <template #default="scope">
             <div style="display: flex; align-items: center">
-              <el-switch v-model="scope.row.status" />
+              <el-switch v-model="scope.row.status" @change="toggleUserStatus([scope.row.id])" />
             </div>
           </template>
         </el-table-column>
         <el-table-column label="Operations">
           <template #default="scope">
-            <el-button size="small" @click="">Edit</el-button>
+            <el-button size="small" @click="openEditFormDialog(scope.row)">Edit</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -63,14 +87,34 @@
           @current-change="getUserList"
       />
     </el-card>
+
+    <el-dialog v-model="dialogFormVisible" title="Edit USer Info" width="400px">
+      <el-form ref="editFormRef" :model="editForm" :rules="rules">
+        <el-form-item label="Nick Name" prop="nickName">
+          <el-input v-model="editForm.nickName" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="Phone Number" prop="phoneNumber">
+          <el-input v-model="editForm.phoneNumber" autocomplete="off" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="handleEdit">
+          Confirm
+        </el-button>
+      </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ArrowRight, Search} from '@element-plus/icons-vue'
+import {ArrowRight, InfoFilled, Search} from '@element-plus/icons-vue'
 import {ref} from "vue";
-import {disableOrEnableUserApi, getUserListApi} from "@/apis/users";
-import {ElMessage} from "element-plus";
+import {disableOrEnableUserApi, getUserListApi, updateUserApi} from "@/apis/users";
+import {ElMessage, FormInstance} from "element-plus";
+import {rules} from "@/rules/userinfo";
 
 const keyword = ref<string>();
 const query = ref({
@@ -113,16 +157,22 @@ const handleSelectionChange = (val: User[]) => {
 }
 const disableUsers = async () => {
   selectedUsers.value = selectedUsers.value.filter((user) => !user.status);
-  const ids = selectedUsers.value.map((user) => user.id);
-  const res = await disableOrEnableUserApi(ids);
-  if (res && res.code === 200) {
-    ElMessage.success(res.message);
-  }
+  await toggleUserStatus();
 }
 const enableUsers = async () => {
   selectedUsers.value = selectedUsers.value.filter((user) => user.status);
-  const ids = selectedUsers.value.map((user) => user.id);
-  const res = await disableOrEnableUserApi(ids);
+  await toggleUserStatus();
+}
+const getUserId = (user: User[]) => {
+  return user.map((user) => user.id);
+}
+const toggleUserStatus = async (ids?: number[]) => {
+  const targetIds = ids ? ids : getUserId(selectedUsers.value);
+  if (!targetIds.length) {
+    ElMessage.error("No user selected");
+    return;
+  }
+  const res = await disableOrEnableUserApi(targetIds);
   if (res && res.code === 200) {
     ElMessage.success(res.message);
   }
@@ -136,6 +186,32 @@ const handleSearch = () => {
         .indexOf(keyword.value?.toLocaleLowerCase()) != -1
   )
 }
+
+interface EditForm {
+  phoneNumber: string,
+  nickName: string
+}
+const editUserId = ref(-1)
+let dialogFormVisible = ref<boolean>(false);
+const editForm = ref<EditForm>({
+  nickName: '',
+  phoneNumber: ''
+})
+
+const openEditFormDialog = (row: User) => {
+  dialogFormVisible.value = true;
+  editForm.value.nickName = row.nickname;
+  editForm.value.phoneNumber = row.phoneNumber;
+  editUserId.value = row.id;
+}
+const handleEdit = async () => {
+  await editFormRef.value?.validate();
+  await updateUserApi(editUserId.value, editForm.value);
+  ElMessage.success("Edit Success");
+  dialogFormVisible.value = false;
+  getUserList().then(() => {});
+}
+const editFormRef = ref<FormInstance>()
 
 getUserList();
 </script>
